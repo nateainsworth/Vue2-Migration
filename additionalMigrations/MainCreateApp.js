@@ -1,6 +1,11 @@
+const fs = require('fs');
 const { transformSync } = require('@swc/core');
+const babel = require('@babel/core');
 
-function transformMainCreateApp(sourceCode){
+function migrateMainCreateApp(){
+  const filePath = 'path/to/main.js'; // Update with the actual path
+  const sourceCode = fs.readFileSync(filePath, 'utf-8');
+
   const transformedCode = transformSync(sourceCode, {
     // SWC transform options
     jsc: {
@@ -61,4 +66,4 @@ function transformMainCreateApp(sourceCode){
   return transformedCode;
 }
 
-module.exports = transformMainCreateApp;
+module.exports = migrateMainCreateApp;

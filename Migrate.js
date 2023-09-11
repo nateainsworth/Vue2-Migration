@@ -1,3 +1,4 @@
+// TODO UPDATE MIGRATE TO ADD additionalMigrations files for migrating main package.json etc.
 const fs = require('fs');
 const path = require('path');
 
