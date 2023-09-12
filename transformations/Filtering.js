@@ -1,7 +1,9 @@
 const { transformSync } = require('@swc/core');
 const babel = require('@babel/core');
 
-function transformFiltering(sourceCode){
+function transformFiltering(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
 
   const transformedCode = transformSync(sourceCode, {
     jsc: {
@@ -28,7 +30,10 @@ function transformFiltering(sourceCode){
               const computedName = `uppercased${variableName.charAt(0).toUpperCase()}${variableName.slice(1)}`;
 
               // Update the template
-              path.node.value.raw = path.node.value.raw.replace(fullMatch, `{{ ${computedName} }}`);
+              if (sourceValue.includes(fullMatch)) {
+                path.node.value.raw = sourceValue.replace(fullMatch, `{{ ${computedName} }}`);
+                changeCount++; // Increment the change count
+              }
 
               // Add computed property if it doesn't exist
               if (!$.types.jsxAttribute(computedName)) {
@@ -56,11 +61,11 @@ function transformFiltering(sourceCode){
                 );
 
                 const component = path.findParent(
-                  parentPath => parentPath.isExportDefaultDeclaration()
+                  (parentPath) => parentPath.isExportDefaultDeclaration()
                 );
 
                 const computedProperties = component.node.declaration.properties.find(
-                  prop => prop.key.name === 'computed'
+                  (prop) => prop.key.name === 'computed'
                 );
 
                 if (computedProperties) {
@@ -73,6 +78,8 @@ function transformFiltering(sourceCode){
                     )
                   );
                 }
+
+                changeCount++; // Increment the change count
               }
 
               match = filterRegex.exec(sourceValue);
@@ -83,7 +90,18 @@ function transformFiltering(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformFiltering;

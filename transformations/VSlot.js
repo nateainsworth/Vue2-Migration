@@ -1,6 +1,9 @@
 const { transformSync } = require('@swc/core');
 
-function transformVSlot(sourceCode){
+function transformVSlot(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
+
   const transformedCode = transformSync(sourceCode, {
     // SWC transform options
     jsc: {
@@ -23,11 +26,17 @@ function transformVSlot(sourceCode){
                     if (name.name === 'slot') {
                       const slotName = value.value;
                       const newSlotName = `#${slotName}`;
-                      value.value = newSlotName;
+                      if (newSlotName !== value.value) {
+                        value.value = newSlotName;
+                        changeCount++; // Increment the change count
+                      }
                     } else if (name.name === 'slot-scope') {
                       const slotScopeVar = value.value;
                       const newSlotScope = `"${slotScopeVar}" as ${slotScopeVar}`;
-                      value.value = newSlotScope;
+                      if (newSlotScope !== value.value) {
+                        value.value = newSlotScope;
+                        changeCount++; // Increment the change count
+                      }
                     }
                   }
                 },
@@ -39,7 +48,18 @@ function transformVSlot(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformVSlot;

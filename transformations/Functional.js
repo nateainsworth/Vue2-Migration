@@ -1,6 +1,9 @@
 const { transformSync } = require('@swc/core');
 
-function transformFunctional(sourceCode){
+function transformFunctional(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
+
   const transformedCode = transformSync(sourceCode, {
     // SWC transform options
     jsc: {
@@ -22,6 +25,7 @@ function transformFunctional(sourceCode){
                   if (name.type === 'JSXIdentifier' && name.name === 'functional') {
                     // Remove the functional attribute
                     attrPath.remove();
+                    changeCount++; // Increment the change count
                   }
                 },
               });
@@ -32,7 +36,18 @@ function transformFunctional(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformFunctional;

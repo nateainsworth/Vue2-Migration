@@ -1,6 +1,9 @@
 const { transformSync } = require('@swc/core');
 
-function transformHookVNode(sourceCode){
+function transformHookVNode(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
+
   const transformedCode = transformSync(sourceCode, {
     jsc: {
       parser: {
@@ -15,6 +18,7 @@ function transformHookVNode(sourceCode){
           JSXAttribute(path) {
             if (path.node.name.name === 'hook:mounted') {
               path.node.name.name = 'vnode-mounted';
+              changeCount++; // Increment the change count
             }
           },
         },
@@ -22,7 +26,18 @@ function transformHookVNode(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformHookVNode;

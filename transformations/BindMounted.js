@@ -1,7 +1,9 @@
 const { transformSync } = require('@swc/core');
 const babel = require('@babel/core');
 
-function transformBindMounted(sourceCode){
+function transformBindMounted(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
 
   const transformedCode = transformSync(sourceCode, {
     jsc: {
@@ -16,9 +18,10 @@ function transformBindMounted(sourceCode){
           FunctionDeclaration(path) {
             if (path.node.id.name === 'bind') {
               path.node.id.name = 'mounted';
+              changeCount++; // Increment the change count
 
               const vmAssignment = path.get('body.body').find(
-                stmt =>
+                (stmt) =>
                   stmt.type === 'VariableDeclaration' &&
                   stmt.declarations[0].id.name === 'vm'
               );
@@ -39,7 +42,18 @@ function transformBindMounted(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformBindMounted;

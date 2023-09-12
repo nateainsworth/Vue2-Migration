@@ -1,6 +1,8 @@
 const { transformSync } = require('@swc/core');
 
-function  transformBeforeDestroy(sourceCode){
+function transformBeforeDestroy(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
 
   const transformedCode = transformSync(sourceCode, {
     jsc: {
@@ -18,17 +20,19 @@ function  transformBeforeDestroy(sourceCode){
             if (declaration.isObjectExpression()) {
               const beforeDestroy = declaration
                 .get('properties')
-                .find(property => property.node.key.name === 'beforeDestroy');
+                .find((property) => property.node.key.name === 'beforeDestroy');
               const destroyed = declaration
                 .get('properties')
-                .find(property => property.node.key.name === 'destroyed');
+                .find((property) => property.node.key.name === 'destroyed');
 
               if (beforeDestroy) {
                 beforeDestroy.node.key.name = 'beforeUnmount';
+                changeCount++; // Increment the change count
               }
 
               if (destroyed) {
                 destroyed.node.key.name = 'unmounted';
+                changeCount++; // Increment the change count
               }
             }
           },
@@ -37,7 +41,18 @@ function  transformBeforeDestroy(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformBeforeDestroy;

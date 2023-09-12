@@ -1,6 +1,9 @@
 const { transformSync } = require('@swc/core');
 
-function transformVueSetVueDelete(sourceCode){
+function transformVueSetVueDelete(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
+
   const transformedCode = transformSync(sourceCode, {
     jsc: {
       parser: {
@@ -25,12 +28,20 @@ function transformVueSetVueDelete(sourceCode){
                   const key = args[1].getSource();
                   const value = args[2].getSource();
 
-                  path.replaceWithSourceText(`${target}.${key} = ${value}`);
+                  const newCode = `${target}.${key} = ${value}`;
+                  if (newCode !== path.getSource()) {
+                    path.replaceWithSourceText(newCode);
+                    changeCount++; // Increment the change count
+                  }
                 } else if (propertyName === 'delete' && args.length === 2) {
                   const target = args[0].getSource();
                   const key = args[1].getSource();
 
-                  path.replaceWithSourceText(`delete ${target}.${key}`);
+                  const newCode = `delete ${target}.${key}`;
+                  if (newCode !== path.getSource()) {
+                    path.replaceWithSourceText(newCode);
+                    changeCount++; // Increment the change count
+                  }
                 }
               }
             }
@@ -40,7 +51,18 @@ function transformVueSetVueDelete(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformVueSetVueDelete;

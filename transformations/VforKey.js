@@ -1,7 +1,9 @@
 const { transformSync } = require('@swc/core');
 const babel = require('@babel/core');
 
-function  transformVForKey(sourceCode){
+function transformVForKey(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
 
   const transformedCode = transformSync(sourceCode, {
     // SWC transform options
@@ -51,6 +53,7 @@ function  transformVForKey(sourceCode){
                       keyAttributeValue
                     )
                   );
+                  changeCount++; // Increment the change count
                 } else {
                   keyAttribute.remove();
                 }
@@ -62,7 +65,18 @@ function  transformVForKey(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformVForKey;

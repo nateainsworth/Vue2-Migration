@@ -1,0 +1,26 @@
+{
+  "name": "vue2-migration",
+  "version": "1.0.0",
+  "description": "Initial development for a compiler to migrate vue2 into vue3",
+  "main": "Migrate.js",
+  "scripts": {
+    "migrate": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nateainsworth/Vue2-Migration.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nateainsworth/Vue2-Migration/issues"
+  },
+  "homepage": "https://github.com/nateainsworth/Vue2-Migration#readme",
+  "dependencies": {
+    "@babel/core": "^7.22.17",
+    "@swc/core": "^1.3.84",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  }
+}

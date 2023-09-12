@@ -2,6 +2,9 @@ const { transformSync } = require('@swc/core');
 const babel = require('@babel/core');
 
 function transformVForVIf(sourceCode){
+  try {
+  let changeCount = 0; // Initialize a change count variable
+
   const transformedCode = transformSync(sourceCode, {
     // SWC transform options
     jsc: {
@@ -46,6 +49,9 @@ function transformVForVIf(sourceCode){
               );
 
               path.replaceWith(newTemplate.program.body[0]);
+
+              // Increment the change count
+              changeCount++;
             }
           },
         },
@@ -53,7 +59,18 @@ function transformVForVIf(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformVForVIf;

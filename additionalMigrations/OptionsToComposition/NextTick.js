@@ -2,7 +2,10 @@ const { transformSync } = require('@swc/core');
 const { default: transform } = require('@swc/helpers');
 const babel = require('@babel/core');
 
-function transformNextTick(sourceCode){
+function transformNextTick(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
+
   const transformedCode = transformSync(sourceCode, {
     // SWC transform options
     jsc: {
@@ -34,6 +37,7 @@ function transformNextTick(sourceCode){
               path.parentPath.replaceWithMultiple(
                 transformedNode.declarations[0].init.arguments[0].body.body
               );
+              changeCount++; // Increment the change count
             }
           },
         },
@@ -41,7 +45,18 @@ function transformNextTick(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformNextTick;

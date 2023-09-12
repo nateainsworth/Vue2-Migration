@@ -1,7 +1,9 @@
 const { transformSync } = require('@swc/core');
 
 const propToUpdate = 'title'; // Update with the actual prop name
-function transformSyncVModel(sourceCode){
+function transformSyncVModel(sourceCode) {
+  try {
+  let changeCount = 0; // Initialize a change count variable
 
   const transformedCode = transformSync(sourceCode, {
     jsc: {
@@ -22,6 +24,7 @@ function transformSyncVModel(sourceCode){
                 attribute.value.expression.type === 'Identifier'
               ) {
                 attribute.name.name = `v-model:${propToUpdate}`;
+                changeCount++; // Increment the change count
               }
             });
           },
@@ -30,7 +33,18 @@ function transformSyncVModel(sourceCode){
     },
   }).code;
 
-  return transformedCode;
+  return {
+    transformedCode,
+    changeCount,
+    error: null, // No error
+  };
+} catch (error) {
+  return {
+    transformedCode: sourceCode,
+    changeCount: 0,
+    error,
+  };
+}
 }
 
 module.exports = transformSyncVModel;
